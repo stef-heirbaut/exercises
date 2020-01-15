@@ -1,0 +1,10 @@
+mkdir exercises
+cd exercises
+git init
+gedit readme
+git commit -m "first commit"
+
+go to github 
+make new repository called exercises 
+git remote add exercise <link>
+git push -u exercise master
