@@ -1,0 +1,253 @@
+exercise 5
+
+1. List the names and addresses of all guests in London, alphabetically ordered by  name.
+
+antw: select guestname, guestaddress from guest where guestaddress like "%London" order by guestname asc
++--------------+--------------------+
+| guestname    | guestaddress       |
++--------------+--------------------+
+| John Kay     | 56 High St, London |
+| Mike Ritchie | 18 Tain St, London |
++--------------+--------------------+
+2 rows in set (0.00 sec)
+	
+
+2. List all double or family rooms with a price below £40.00 per night, cheapest first.
+
+select * from room where type != "Single" and price < 40
++--------+---------+--------+-------+
+| roomno | hotelno | type   | price |
++--------+---------+--------+-------+
+|    601 | fb01    | double | 29.00 |
+|    701 | fb01    | family | 39.00 |
+|    801 | ch02    | double | 15.00 |
+|   1001 | dc01    | double | 30.00 |
+|   1101 | dc01    | family | 35.00 |
++--------+---------+--------+-------+
+5 rows in set (0.00 sec)
+
+
+
+3. List the bookings for which no date_to has been specified.
+
+select * from booking where dateto is NOT NULL
++---------+---------+------------+------------+--------+
+| hotelno | guestno | datefrom   | dateto     | roomno |
++---------+---------+------------+------------+--------+
+| ch02    |   10002 | 2020-04-25 | 2020-05-06 |    801 |
+| dc01    |   10007 | 2020-05-13 | 2020-05-15 |   1001 |
+| fb01    |   10001 | 2020-04-01 | 2020-04-08 |    501 |
+| fb01    |   10002 | 2020-01-04 | 2020-01-29 |    601 |
+| fb01    |   10004 | 2020-04-15 | 2020-05-15 |    601 |
+| fb01    |   10005 | 2020-05-02 | 2020-05-07 |    501 |
+| fb02    |   10003 | 2020-04-05 | 2022-04-04 |   1001 |
+| fb02    |   10005 | 2020-05-12 | 2030-05-04 |   1101 |
++---------+---------+------------+------------+--------+
+8 rows in set (0.00 sec)
+
+
+
+4. What is the average price of a room?
+
+select avg(price) from room
+'35.748333'
+
+select type, avg(price) from room group by type
++--------+------------+
+| type   | avg(price) |
++--------+------------+
+| single |  26.998000 |
+| double |  40.000000 |
+| family |  44.663333 |
++--------+------------+
+3 rows in set (0.00 sec)
+
+
+
+5. What is the total revenue per night from all double rooms?
+
+select type, sum(price) from room where type = "double"
++--------+------------+
+| type   | sum(price) |
++--------+------------+
+| double |     160.00 |
++--------+------------+
+1 row in set (0.00 sec)
+
+
+6. How many different guests have made bookings for August?
+
+select guestno from booking where (datefrom < "2020-07-31" and dateto > "2020-09-01") or (datefrom < "2020-08-31" and datefrom > "2020-08-01")
++---------+
+| guestno |
++---------+
+|   10003 |
+|   10005 |
++---------+
+2 rows in set (0.00 sec)
+
+
+
+
+7. List the price and type of all rooms at the The Tower Hotel.
+select type, price, hotelname from room r join hotel h on h.hotelno = r.hotelno where hotelname = "The Tower Hotel"
+
++--------+-------+-----------------+
+| type   | price | hotelname       |
++--------+-------+-----------------+
+| single | 19.00 | The Tower Hotel |
+| double | 29.00 | The Tower Hotel |
+| family | 39.00 | The Tower Hotel |
++--------+-------+-----------------+
+3 rows in set (0.00 sec)
+
+
+8. List all guests currently staying at the The Tower Hotel.
+
+select guestname, hotelname from guest g join booking b on g.guestno=b.guestno join room r on r.roomno=b.roomno join hotel h on h.hotelno=r.hotelno where hotelname = "The Tower Hotel" and (datefrom <= "2020-01-15" and dateto >="2020-01-15");
+
++--------------+-----------------+
+| guestname    | hotelname       |
++--------------+-----------------+
+| Mike Ritchie | The Tower Hotel |
++--------------+-----------------+
+1 row in set (0.00 sec)
+
+
+
+
+9. List the details of all rooms at the The Tower Hotel, including the name of the guest  staying in the room, if the room is occupied.
+
+select guestname, hotelname, city, type, price from booking b join guest g on g.guestno = b.guestno join room r on  r.roomno = b.roomno join hotel h on h.hotelno = r.hotelno  where hotelname = "The Tower Hotel" and (datefrom <= "2020-01-15" and dateto >="2020-01-15")
++--------------+-----------------+--------+--------+-------+
+| guestname    | hotelname       | city   | type   | price |
++--------------+-----------------+--------+--------+-------+
+| Mike Ritchie | The Tower Hotel | London | double | 29.00 |
++--------------+-----------------+--------+--------+-------+
+1 row in set (0.02 sec)
+
+
+
+10. What is the total income from bookings for the The Tower Hotel today?
+
+select sum(price) from booking b join guest g on g.guestno = b.guestno join room r on  r.roomno = b.roomno join hotel h on h.hotelno = r.hotelno  where hotelname = "The Tower Hotel" and (datefrom <= "2020-01-15" and dateto >="2020-01-15")
+'29.00'
+
+
+		
+
+11. List the rooms that are currently unoccupied at the The Tower Hotel.
+
+select r.roomno from booking b join guest g on g.guestno = b.guestno join room r on  r.roomno = b.roomno join hotel h on h.hotelno = r.hotelno   where hotelname = "The Tower Hotel" and (datefrom > "2020-01-15" or dateto <"2020-01-15") group by r.roomno 
++--------+
+| roomno |
++--------+
+|    501 |
+|    601 |
+|    701 |
++--------+
+3 rows in set (0.00 sec)
+
+
+12. What is the lost income from unoccupied rooms at the The Tower Hotel?
+ 
+select sum(price) from booking b join guest g on g.guestno = b.guestno join room r on  r.roomno = b.roomno join hotel h on h.hotelno = r.hotelno   where hotelname = "The Tower Hotel" and (datefrom > "2020-01-15" or dateto <"2020-01-15")  
++------------+
+| sum(price) |
++------------+
+|     106.00 |
++------------+
+1 row in set (0.01 sec)
+
+
+13. List the number of rooms in each hotel in London.
+select roomno, hotelname from room r join  hotel h on h.hotelno = r.hotelno where city = "London"
+
++--------+-----------------+
+| roomno | hotelname       |
++--------+-----------------+
+|   1001 | Omni Shoreham   |
+|   1101 | Omni Shoreham   |
+|    701 | Phoenix Park    |
+|    801 | Phoenix Park    |
+|    501 | The Tower Hotel |
+|    601 | The Tower Hotel |
+|    701 | The Tower Hotel |
++--------+-----------------+
+7 rows in set (0.00 sec)
+
+
+
+
+14. What is the most commonly booked room type for each hotel in London?
+
+select concat(b.roomno," ", hotelname) as room_hotel, count(  concat(b.roomno," ", hotelname)) as rooms from booking b  join room r on  r.roomno = b.roomno join hotel h on h.hotelno = r.hotelno   where city = "London"  group by room_hotel
++---------------------+-------+
+| room_hotel          | rooms |
++---------------------+-------+
+| 1001 Omni Shoreham  |     3 |
+| 1101 Omni Shoreham  |     2 |
+| 701 Phoenix Park    |     1 |
+| 801 Phoenix Park    |     1 |
+| 501 The Tower Hotel |     2 |
+| 601 The Tower Hotel |     2 |
+| 701 The Tower Hotel |     1 |
++---------------------+-------+
+7 rows in set (0.00 sec)
+
+
+
+
+
+15. Update the price of all rooms by 5%.
+
+select round((price * 1.05),2)as update_price from room;
++--------------+
+| update_price |
++--------------+
+|        19.95 |
+|        30.45 |
+|        10.50 |
+|        40.95 |
+|        15.75 |
+|        18.90 |
+|        31.49 |
+|        31.50 |
+|        60.90 |
+|        62.99 |
+|        36.75 |
+|        90.30 |
++--------------+
+12 rows in set (0.01 sec)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
